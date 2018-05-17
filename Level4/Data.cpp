@@ -53,87 +53,82 @@ bool checkPlayAreaClick(COORD xy, int width, int height)
 	return (xy.X >= 4 && xy.X <= width * 2 + 2 && xy.Y >= 4 && xy.Y <= height + 3);
 }
 
-void clickEvent(int click, COORD xy, COORD **block, char **board, BlockData **blockData, int width, int height,int mines, int &noneMines, int key, int &gameLoop)
+void clickEvent(int click, COORD xy, COORD **block, char **board, BlockData **blockData, int width, int height, int mines, int &noneMines, int key, int &gameLoop)
 {
-	 
 	SetXY(xy.X, xy.Y);
 
 	for (int i = 0; i < height; i++)
-	for (int j = 0; j < width; j++)
-	{
-		 
-		if (block[i][j].X == xy.Y && block[i][j].Y == xy.X)	//FIND BLOCK COORD
+		for (int j = 0; j < width; j++)
 		{
-			if ((*(blockData + i) + j)->State == COVERED) //CHECK BLOCK STATUS COVERED
+			if (block[i][j].X == xy.Y && block[i][j].Y == xy.X)	//FIND BLOCK COORD
 			{
-				if (click == 1)
+				if ((*(blockData + i) + j)->State == COVERED) //CHECK BLOCK STATUS COVERED
 				{
-					printBlock(board, i, j, width, height, xy);
-					checkGameConditions(board[i][j], width, height,mines, noneMines, key, gameLoop);
-					(*(blockData + i) + j)->State = UNCOVERED;
-					goto end;
-				}
-				if (click == 2)  //RIGHT CLICK ON COVERED BLOCK => CHANGE TO MARKED
+					if (click == 1)
+					{
+						printBlock(board, i, j, width, height, xy);
+						checkGameConditions(board[i][j], width, height, mines, noneMines, key, gameLoop);
+						(*(blockData + i) + j)->State = UNCOVERED;
+						goto end;
+					}
+					if (click == 2)  //RIGHT CLICK ON COVERED BLOCK => CHANGE TO MARKED
+					{
+						SetColor(12);
+						printf("%c", (char)241);
+						(*(blockData + i) + j)->State = MARKED;
+						if ((*(blockData + i) + j)->Data == '*')
+							minesDetected++;
+						SetColor(15);
+						SetXY(39, 1);
+						minesTemp--;
+						if (minesTemp < 0)
+							printf(" 0");
+						else printf("%2d", minesTemp);
+						goto end;
+					}
+				} //END IF CHECK STATUS COVERED
+
+				if ((*(blockData + i) + j)->State == MARKED && click == 2)	//CHECK MARKED STATUS
 				{
-					SetColor(12);
-					printf("%c", (char)241);
-					(*(blockData + i) + j)->State = MARKED;
+					SetColor(14);
+					printf("?");
+					(*(blockData + i) + j)->State = QUESTIONABLE;
 					if ((*(blockData + i) + j)->Data == '*')
-						minesDetected++;
+						minesDetected--;
 					SetColor(15);
 					SetXY(39, 1);
-					minesTemp--;
+					minesTemp++;
 					if (minesTemp < 0)
 						printf(" 0");
 					else printf("%2d", minesTemp);
 					goto end;
-				}
-			} //END IF CHECK STATUS COVERED
+				}//END IF CHECK MARKED STATUS
 
-			if ((*(blockData + i) + j)->State == MARKED && click == 2)	//CHECK MARKED STATUS
-			{
-				SetColor(14);
-				printf("?");
-				(*(blockData + i) + j)->State = QUESTIONABLE;
-				if ((*(blockData + i) + j)->Data == '*')
-					minesDetected--;
-				SetColor(15);
-				SetXY(39, 1);
-				minesTemp++;
-				if (minesTemp < 0)
-					printf(" 0");
-				else printf("%2d", minesTemp);
-				goto end;
-			}//END IF CHECK MARKED STATUS
-
-			if ((*(blockData + i) + j)->State == QUESTIONABLE) //CHECK QUESTIONABLE STATUS 
-			{
-				if (click == 1)
+				if ((*(blockData + i) + j)->State == QUESTIONABLE) //CHECK QUESTIONABLE STATUS
 				{
-					printBlock(board, i, j, width, height, xy);
-					checkGameConditions(board[i][j], width, height,mines, noneMines, key, gameLoop);
-					(*(blockData + i) + j)->State = UNCOVERED;
-					goto end;
-				}
-				if (click == 2)  //RIGHT CLICK ON COVERED BLOCK => CHANGE TO MARKED
-				{
-					SetColor(11);
-					printf("=");
-					(*(blockData + i) + j)->State = COVERED;
-					SetColor(15);
-					goto end;
-				}
-			} //END IF CHECK QUESTIONABLE
-
-		} //END IF FIND COORD
-	}
+					if (click == 1)
+					{
+						printBlock(board, i, j, width, height, xy);
+						checkGameConditions(board[i][j], width, height, mines, noneMines, key, gameLoop);
+						(*(blockData + i) + j)->State = UNCOVERED;
+						goto end;
+					}
+					if (click == 2)  //RIGHT CLICK ON COVERED BLOCK => CHANGE TO MARKED
+					{
+						SetColor(11);
+						printf("=");
+						(*(blockData + i) + j)->State = COVERED;
+						SetColor(15);
+						goto end;
+					}
+				} //END IF CHECK QUESTIONABLE
+			} //END IF FIND COORD
+		}
 end: return;
-
 }
 
 void printBlock(char **board, int i, int j, int width, int height, COORD xy)
 {
-	 
 	switch (board[i][j])
 	{
 	case '1':SetColor(9);
@@ -172,7 +167,6 @@ void printBlock(char **board, int i, int j, int width, int height, COORD xy)
 }
 void revealEmpty(char **board, bool **&check, int i, int j, int width, int height, COORD xy)
 {
-	 
 	if (i < 0 || j < 0 || i == height || j == width) return;
 
 	//TOP MID
@@ -185,10 +179,10 @@ void revealEmpty(char **board, bool **&check, int i, int j, int width, int heigh
 			revealEmpty(board, check, i - 1, j, width, height, { xy.X, xy.Y - 1 });
 		}
 	}
+
 	//LEFT
 	if (j - 1 >= 0)
 	{
-
 		if (board[i][j - 1] == '-' && check[i][j - 1] == false)
 		{
 			check[i][j - 1] = true;
@@ -211,7 +205,6 @@ void revealEmpty(char **board, bool **&check, int i, int j, int width, int heigh
 	//BOTTOM MID
 	if (i + 1 < height)
 	{
-
 		if (board[i + 1][j] == '-' && check[i + 1][j] == false)
 		{
 			check[i + 1][j] = true;
@@ -219,18 +212,15 @@ void revealEmpty(char **board, bool **&check, int i, int j, int width, int heigh
 			revealEmpty(board, check, i + 1, j, width, height, { xy.X, xy.Y + 1 });
 		}
 	}
-
 }
 void printEmpty(COORD xy, int x, int y)
 {
-	 
 	xy.X += x; xy.Y += y;
 	SetXY(xy.X, xy.Y);
 	printf(" ");
 }
 void revealAll(char **board, int width, int height)
 {
-	 
 	for (int i = 0; i < height; i++)
 	{
 		SetXY(4, 4 + i);
@@ -261,9 +251,8 @@ void revealAll(char **board, int width, int height)
 		}
 	}
 }
-void checkGameConditions(char block, int width, int height,int mines, int &noneMines, int key, int &gameLoop)
+void checkGameConditions(char block, int width, int height, int mines, int &noneMines, int key, int &gameLoop)
 {
-	 
 	if (block != '*')
 	{
 		noneMines--;
@@ -271,7 +260,6 @@ void checkGameConditions(char block, int width, int height,int mines, int &noneM
 
 	if (block == '*' || noneMines == 0)
 	{
-
 		//system("cls");
 		//DELETE DEFAULT BUTTON
 		for (int i = 0; i < 3; i++)
@@ -282,6 +270,7 @@ void checkGameConditions(char block, int width, int height,int mines, int &noneM
 				printf(" ");
 			}
 		}
+
 		//DRAW RESTART BUTTON
 		drawButton(15 + width * 2, height - 3, "Restart");
 		drawButton(15 + width * 2, height, "  Exit ");
@@ -308,7 +297,6 @@ void checkGameConditions(char block, int width, int height,int mines, int &noneM
 					gameLoop = 1;
 				if (temp.Y >= height - 1 && temp.Y <= height + 1)
 				{
-
 					exit(0);
 				}
 				break;
@@ -342,7 +330,7 @@ void mineGenerator(BlockData **&blockData, char **&board, int width, int height,
 	else if (width == 30 && height == 16)
 		mines = 99;
 	else
-	mines = (int)(width*height*0.15f);
+		mines = (int)(width*height*0.15f);
 	noneMines = width*height - mines;
 
 	//initalize matrix
@@ -353,7 +341,6 @@ void mineGenerator(BlockData **&blockData, char **&board, int width, int height,
 		for (j = 0; j < width; j++)
 			m[i][j] = 0;
 	}
-
 
 	int totalMines = 0;	//count total randomized mines
 
@@ -368,12 +355,11 @@ void mineGenerator(BlockData **&blockData, char **&board, int width, int height,
 		if (m[i][j] == 1)		//increase randomized mines
 		{
 			totalMines++;
-			m[i][j] = 9;	//set mine-tiled to 9 
+			m[i][j] = 9;	//set mine-tiled to 9
 		}
 
 		if (totalMines == mines)	//early break loop
 			goto setMatrix;
-
 	}
 setMatrix: for (i = 0; i < height; i++)
 	for (j = 0; j < width; j++)
@@ -391,32 +377,32 @@ setMatrix: for (i = 0; i < height; i++)
 			if (i + 1 < height && j + 1 < width && m[i + 1][j + 1] != 9) m[i + 1][j + 1]++;
 		}
 	}
-	board = new char *[height];
-	blockData = new BlockData*[height];
+		   board = new char *[height];
+		   blockData = new BlockData*[height];
 
-	for (int i = 0; i < height; i++)
-	{
-		board[i] = new char[width];
-		blockData[i] = new BlockData[width];
-		for (int j = 0; j < width; j++)
-		{
-			switch (m[i][j])
-			{
-			case 9:
-				board[i][j] = (char)'*';
-				break;
-			case 0:
-				board[i][j] = (char)'-';
-				break;
-			default:
-				board[i][j] = m[i][j] + 48;
-				break;
-			}
+		   for (int i = 0; i < height; i++)
+		   {
+			   board[i] = new char[width];
+			   blockData[i] = new BlockData[width];
+			   for (int j = 0; j < width; j++)
+			   {
+				   switch (m[i][j])
+				   {
+				   case 9:
+					   board[i][j] = (char)'*';
+					   break;
+				   case 0:
+					   board[i][j] = (char)'-';
+					   break;
+				   default:
+					   board[i][j] = m[i][j] + 48;
+					   break;
+				   }
 
-			(*(blockData + i) + j)->Data = board[i][j];
-			(*(blockData + i) + j)->State = COVERED;
-		}
-	}
+				   (*(blockData + i) + j)->Data = board[i][j];
+				   (*(blockData + i) + j)->State = COVERED;
+			   }
+		   }
 }
 
 void enterUsername()
@@ -424,7 +410,7 @@ void enterUsername()
 	system("cls");
 	SetWindowSize(15, 15);
 	SetConsoleFontSize({ 18, 18 });
-	userEnter: SetXY(8, 10);
+userEnter: SetXY(8, 10);
 	SetColor(11);
 	printf("Enter username :\n");
 	SetXY(8, 11);
@@ -432,13 +418,13 @@ void enterUsername()
 	SetXY(25, 10);
 	char temp[255];
 	SetColor(15);
-	gets(temp);
+	gets_s(temp);
 	if (strlen(temp) > 12 || strlen(temp) <= 0)
 	{
 		SetXY(8, 12);
 		SetColor(12);
-		printf("Error in username lenght. Re-enter\n"); 
-		SetXY(25, 10); 
+		printf("Error in username lenght. Re-enter\n");
+		SetXY(25, 10);
 		for (int i = 0; i < strlen(temp); i++)
 			printf(" ");
 		goto userEnter;
@@ -469,7 +455,7 @@ void updateHighscore()
 	{
 		for (int j = i + 1; j < playerNumber; j++)
 		{
-			if ((player[i].score < player[j].score) || (player[i].score == player[j].score && player[i].time >player[j].time))
+			if ((player[i].score < player[j].score) || (player[i].score == player[j].score && player[i].time > player[j].time))
 			{
 				PlayerScore temp = player[i];
 				player[i] = player[j];
@@ -477,7 +463,7 @@ void updateHighscore()
 			}
 		}
 	}
-	fprintf(f,"HIGHSCORE RANKING\n");
+	fprintf(f, "HIGHSCORE RANKING\n");
 	fprintf(f, "  Username  | Score | Time |\n");
 	for (int i = 0; i < playerNumber; i++)
 	{

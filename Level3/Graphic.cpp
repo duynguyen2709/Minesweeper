@@ -56,12 +56,15 @@ void DrawRect(int x, int y, int width, int height, COORD **&block)
 
 	//SAVE BLOCKS POSITIONS TO COORD
 	block = new COORD *[height];
-	for (i = 0; i<height; i++)
+	for (i = 0; i < height; i++)
 	{
 		block[i] = new COORD[width];
 	}
 
-	block[0][0] = { x + 1, y + 1 };
+	COORD temp;
+	temp.X = x + 1;
+	temp.Y = y + 1;
+	block[0][0] = temp;
 	i = 0;
 
 	while (i < height)
@@ -70,23 +73,23 @@ void DrawRect(int x, int y, int width, int height, COORD **&block)
 		{
 			if (i != 0 && j == 0)
 			{
-				block[i][j] = { x + i + 1, block[i - 1][j].Y };
+				temp.X = x + i + 1;
+				temp.Y = block[i - 1][j].Y;
+				block[i][j] = temp;
 			}
 			if (j != 0)
 			{
 				block[i][j] = { block[i][j - 1].X, block[i][j - 1].Y + 2 };
 			}
-
 		}
 		i++;
 	} //END WHILE
 
 	//SET WINDOW FONT SIZE
 
-	if ((width>height ? width : height) >= 30)
+	if ((width > height ? width : height) >= 30)
 		SetConsoleFontSize({ 17, 17 });
 	else SetConsoleFontSize({ 20, 20 });
-
 
 	//DRAW BUTTON
 	drawButton(2, 1, "NEW GAME");
@@ -126,7 +129,6 @@ void DrawRect(int x, int y, int width, int height, COORD **&block)
 
 	SetColor(15);
 	SetXY(0, 0);
-	
 }
 
 //SET WINDOW SIZE
@@ -172,7 +174,6 @@ void SetConsoleWindowSize(int x, int y)
 	if (!SetConsoleScreenBufferSize(h, size))
 		throw std::runtime_error("Unable to resize screen buffer.");
 
-
 	SMALL_RECT info = { 0, 0, x - 1, y - 1 };
 	if (!SetConsoleWindowInfo(h, TRUE, &info))
 		throw std::runtime_error("Unable to resize window after resizing buffer.");
@@ -217,6 +218,7 @@ void SetWindowSize(int width, int height)
 		}
 	}
 }
+
 //END SET WINDOW SIZE FUNCTIONS
 
 void SetColor(WORD color)
@@ -241,11 +243,10 @@ void FixedConsoleSize()
 	MENUITEMINFO mii;
 	SetConsoleTitle(TEXT("Minesweeper"));
 	Sleep(10); //Let the window to update the Title!
-	hConsole = FindWindow(NULL, TEXT("Minesweeper"));	
-	SetWindowLong(hConsole, GWL_STYLE,GetWindowLong(hConsole, GWL_STYLE) & ~WS_MAXIMIZEBOX);
+	hConsole = FindWindow(NULL, TEXT("Minesweeper"));
+	SetWindowLong(hConsole, GWL_STYLE, GetWindowLong(hConsole, GWL_STYLE) & ~WS_MAXIMIZEBOX);
 	SetWindowLong(hConsole, GWL_STYLE, GetWindowLong(hConsole, GWL_STYLE)&~WS_SIZEBOX);
 }
-
 
 //DRAW BMP FILE
 void readBmpHeader(FILE *f, BmpHeader &header)
@@ -308,14 +309,14 @@ void drawBmp(BmpDib dib, PixelArray data)
 	HDC hdc = GetDC(console);
 
 	for (int i = 0; i < dib.imageHeight; i++)
-	for (int j = 0; j < dib.imageWidth; j++)
-	{
-		if (data.pixels[i][j].blue != 0 && data.pixels[i][j].red != 0 && data.pixels[i][j].green != 0)
+		for (int j = 0; j < dib.imageWidth; j++)
 		{
-			Color pixel = data.pixels[i][j];
-			SetPixelV(hdc, j + 75, i + 100, RGB(pixel.red, pixel.green, pixel.blue));
+			if (data.pixels[i][j].blue != 0 && data.pixels[i][j].red != 0 && data.pixels[i][j].green != 0)
+			{
+				Color pixel = data.pixels[i][j];
+				SetPixelV(hdc, j + 75, i + 100, RGB(pixel.red, pixel.green, pixel.blue));
+			}
 		}
-	}
 }
 void releaseBmpPixelArray(PixelArray data)
 {
@@ -324,8 +325,8 @@ void releaseBmpPixelArray(PixelArray data)
 
 	delete[]data.pixels;
 }
-//END DRAW BMP FUNCTIONS
 
+//END DRAW BMP FUNCTIONS
 
 void drawImage(char *fileName)
 {
@@ -345,7 +346,6 @@ void drawImage(char *fileName)
 	releaseBmpPixelArray(Data);
 
 	fclose(fbmp1);
-
 }
 void drawGuideGame()
 {

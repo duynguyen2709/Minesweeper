@@ -26,106 +26,109 @@ void drawButton(int x, int y, char *buttonText)
 {
 	int i;
 	SetColor(14);
-	SetXY(x - 1, y-1);
+	SetXY(x - 1, y - 1);
 	cout << char(201);
 	for (i = 0; i < strlen(buttonText); i++)
 		cout << char(205);
 	cout << char(187);
-	SetXY(x-1, y+1);
+	SetXY(x - 1, y + 1);
 	cout << char(200);
 	for (i = 0; i < strlen(buttonText); i++)
 		cout << char(205);
 	cout << char(188);
-	SetXY(x-1, y);
+	SetXY(x - 1, y);
 	cout << char(186);
-	
+
 	SetXY(x, y);
 	SetColor(15);
-	cout << buttonText ;
+	cout << buttonText;
 
 	SetColor(14);
 	SetXY(x + strlen(buttonText), y);
 	cout << char(186) << " ";
 	SetColor(15);
 }
-void DrawRect(int x, int y, int width, int height,COORD **&block)
+void DrawRect(int x, int y, int width, int height, COORD **&block)
 {
 	int i, j;
 	system("cls");
 	SetWindowSize(width, height);
+
 	//SAVE BLOCKS POSITIONS TO COORD
 	block = new COORD *[height];
-	for (i = 0; i<height; i++)
+	for (i = 0; i < height; i++)
 	{
 		block[i] = new COORD[width];
 	}
 
-	block[0][0] = { x+1, y+1 };
+	COORD temp;
+	temp.X = x + 1;
+	temp.Y = y + 1;
+	block[0][0] = temp;
 	i = 0;
 
 	while (i < height)
 	{
 		for (j = 0; j < width; j++)
 		{
-			if (i!=0 && j == 0)
+			if (i != 0 && j == 0)
 			{
-				block[i][j] = { x + i + 1, block[i - 1][j].Y };
+				temp.X = x + i + 1;
+				temp.Y = block[i - 1][j].Y;
+				block[i][j] = temp;
 			}
 			if (j != 0)
 			{
 				block[i][j] = { block[i][j - 1].X, block[i][j - 1].Y + 2 };
 			}
-		
 		}
 		i++;
 	} //END WHILE
 
 	//SET WINDOW FONT SIZE
-	
-	if ((width>height?width:height)>=30)
+
+	if ((width > height ? width : height) >= 30)
 		SetConsoleFontSize({ 17, 17 });
 	else SetConsoleFontSize({ 20, 20 });
-	
 
 	//DRAW BUTTON
 	drawButton(2, 1, "NEW GAME");
 	drawButton(15, 1, "  EXIT  ");
-	
+
 	//PRINT RECTANGLE
 	SetXY(x, y);
 	cout << char(201);
-	for (i = 1; i < width*2; i++)
+	for (i = 1; i < width * 2; i++)
 		cout << char(205);
 	cout << char(187);
-	SetXY(x, height + y +1); 
+	SetXY(x, height + y + 1);
 	cout << char(200);
-	for (i = 1; i < width*2; i++)
+	for (i = 1; i < width * 2; i++)
 		cout << char(205);
 	cout << char(188);
 	j = 0;
 	for (i = y + 1; i < height + y + 1; i++)
 	{
-		SetXY(x, i); 
+		SetXY(x, i);
 		SetColor(15);
 		cout << char(186);
 
 		//PRINT BOARD
-			for (j = 0; j < width; j++)
-			{
-				SetColor(11);
-				cout << "= " ;
-			}	//end for
-		
-			cout << endl;
-		
-		 SetXY(x + width*2, i); 
-		 SetColor(15);
-		 cout << char(186);
+		for (j = 0; j < width; j++)
+		{
+			SetColor(11);
+			cout << "= ";
+		}	//end for
+
+		cout << endl;
+
+		SetXY(x + width * 2, i);
+		SetColor(15);
+		cout << char(186);
 	}  //end for
 
 	SetColor(15);
 	SetXY(0, 0);
-	
 }
 
 //SET WINDOW SIZE
@@ -171,7 +174,6 @@ void SetConsoleWindowSize(int x, int y)
 	if (!SetConsoleScreenBufferSize(h, size))
 		throw std::runtime_error("Unable to resize screen buffer.");
 
-
 	SMALL_RECT info = { 0, 0, x - 1, y - 1 };
 	if (!SetConsoleWindowInfo(h, TRUE, &info))
 		throw std::runtime_error("Unable to resize window after resizing buffer.");
@@ -191,7 +193,7 @@ void ShowLastSystemError()
 	std::cerr << messageBuffer << '\n';
 	LocalFree(messageBuffer);
 }
-void SetWindowSize(int width,int height)
+void SetWindowSize(int width, int height)
 {
 	SetConsoleTitle(TEXT("Minesweeper"));
 	COORD consoleSize;
@@ -199,7 +201,7 @@ void SetWindowSize(int width,int height)
 	consoleSize.Y = height + 10;
 	if (consoleSize.X != 0 && consoleSize.Y != 0)
 	{
-		try 
+		try
 		{
 			SetConsoleWindowSize(consoleSize.X, consoleSize.Y);
 		}
@@ -216,6 +218,7 @@ void SetWindowSize(int width,int height)
 		}
 	}
 }
+
 //END SET WINDOW SIZE FUNCTIONS
 
 void SetColor(WORD color)
@@ -243,9 +246,7 @@ void FixedConsoleSize()
 	hConsole = FindWindow(NULL, TEXT("Minesweeper"));
 	SetWindowLong(hConsole, GWL_STYLE, GetWindowLong(hConsole, GWL_STYLE) & ~WS_MAXIMIZEBOX);
 	SetWindowLong(hConsole, GWL_STYLE, GetWindowLong(hConsole, GWL_STYLE)&~WS_SIZEBOX);
-
 }
-
 
 //DRAW BMP FILE
 void readBmpHeader(FILE *f, BmpHeader &header)
@@ -308,14 +309,14 @@ void drawBmp(BmpDib dib, PixelArray data)
 	HDC hdc = GetDC(console);
 
 	for (int i = 0; i < dib.imageHeight; i++)
-	for (int j = 0; j < dib.imageWidth; j++)
-	{
-		if (data.pixels[i][j].blue != 0 && data.pixels[i][j].red != 0 && data.pixels[i][j].green != 0)
+		for (int j = 0; j < dib.imageWidth; j++)
 		{
-			Color pixel = data.pixels[i][j];
-			SetPixelV(hdc, j+75, i+100, RGB(pixel.red, pixel.green, pixel.blue));
+			if (data.pixels[i][j].blue != 0 && data.pixels[i][j].red != 0 && data.pixels[i][j].green != 0)
+			{
+				Color pixel = data.pixels[i][j];
+				SetPixelV(hdc, j + 75, i + 100, RGB(pixel.red, pixel.green, pixel.blue));
+			}
 		}
-	}
 }
 void releaseBmpPixelArray(PixelArray data)
 {
@@ -324,8 +325,8 @@ void releaseBmpPixelArray(PixelArray data)
 
 	delete[]data.pixels;
 }
-//END DRAW BMP FUNCTIONS
 
+//END DRAW BMP FUNCTIONS
 
 void drawImage(char *fileName)
 {
@@ -333,7 +334,7 @@ void drawImage(char *fileName)
 	BmpHeader Header;
 	BmpDib Dib;
 	PixelArray Data;
-	
+
 	//open file BMP
 	fbmp1 = fopen(fileName, "rb+");
 
@@ -345,7 +346,6 @@ void drawImage(char *fileName)
 	releaseBmpPixelArray(Data);
 
 	fclose(fbmp1);
-
 }
 
 void drawGuideGame()
