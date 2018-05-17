@@ -1,0 +1,5 @@
+HIGHSCORE RANKING
+  Username  | Score | Time |
+        John|  50.0 |  120 |
+         Nam|  32.2 |   80 |
+        test|   0.0 |    3 |
